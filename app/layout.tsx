@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/layout/header";
+import { Inter } from "next/font/google";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -27,9 +32,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-secondary text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased bg-secondary text-foreground`}
       >
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 w-full">
           <Header />
           <main>{children}</main>
         </div>
