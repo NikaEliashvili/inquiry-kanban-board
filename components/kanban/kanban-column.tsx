@@ -29,7 +29,7 @@ const KanbanColumn: FC<KanbanBoardProps> = ({ type, inquiries = [] }) => {
         isOver && "ring ring-primary/5"
       )}
     >
-      <div className=" flex flex-col gap-3 py-4 px-2 pb-0">
+      <div className=" flex flex-col gap-3 py-4 px-2 pb-0 sticky top-0 ">
         <div className="flex items-center gap-3">
           <div
             className={cn("rounded-full size-3")}
@@ -53,6 +53,7 @@ const KanbanColumn: FC<KanbanBoardProps> = ({ type, inquiries = [] }) => {
       <SortableContext
         items={inquiries.map((i) => i.id)}
         strategy={verticalListSortingStrategy}
+        key={"sortable-context"}
       >
         <div
           ref={setNodeRef}

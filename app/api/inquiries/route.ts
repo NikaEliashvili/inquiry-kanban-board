@@ -1,3 +1,4 @@
+import { getInquiries } from "@/data/data-handler";
 import { mockInquiries } from "@/data/mock-inquiries";
 import { delay } from "@/lib/utils";
 import { isAfter, isBefore, isDate, isSameDay } from "date-fns";
@@ -7,34 +8,65 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const clientName = searchParams.get("clientName");
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
+    const startDate = searchParams.get("eventFrom");
+    const endDate = searchParams.get("eventTo");
     const minValueQuery = searchParams.get("minValue");
     const minValue = Number(minValueQuery);
 
-    let filtered = mockInquiries;
+    let inquiriesList = getInquiries();
 
-    if (clientName) {
-      filtered = filtered.filter((inq) => inq.clientName.includes(clientName));
-    }
-    if (startDate && isDate(startDate)) {
-      filtered = filtered.filter(
-        (inq) =>
+    // if (clientName) {
+    //   filtered = filtered.filter((inq) =>
+    //     inq.clientName
+    //       .toLocaleLowerCase()
+    //       .includes(clientName.toLocaleLowerCase())
+    //   );
+    // }
+    // if (startDate && isDate(new Date(startDate))) {
+    //   filtered = filtered.filter(
+    //     (inq) =>
+    //       isAfter(new Date(inq.eventDate), new Date(startDate)) ||
+    //       isSameDay(new Date(inq.eventDate), new Date(startDate))
+    //   );
+    // }
+
+    // if (endDate && isDate(endDate)) {
+    //   filtered = filtered.filter(
+    //     (inq) =>
+    //       isBefore(new Date(inq.eventDate), new Date(endDate)) ||
+    //       isSameDay(new Date(inq.eventDate), new Date(endDate))
+    //   );
+    // }
+    // if (minValue && minValue > 0) {
+    //   filtered = filtered.filter((inq) => inq.potentialValue >= minValue);
+    // }
+
+    const filtered = inquiriesList.filter((inq) => {
+      let hasMatch = true;
+      if (clientName) {
+        hasMatch = inq.clientName
+          .toLocaleLowerCase()
+          .includes(clientName.toLocaleLowerCase());
+      }
+      if (!hasMatch) return false;
+
+      if (startDate && isDate(new Date(startDate))) {
+        hasMatch =
           isAfter(new Date(inq.eventDate), new Date(startDate)) ||
-          isSameDay(new Date(inq.eventDate), new Date(startDate))
-      );
-    }
-
-    if (endDate && isDate(endDate)) {
-      filtered = filtered.filter(
-        (inq) =>
+          isSameDay(new Date(inq.eventDate), new Date(startDate));
+      }
+      if (!hasMatch) return false;
+      if (endDate && isDate(new Date(endDate))) {
+        hasMatch =
           isBefore(new Date(inq.eventDate), new Date(endDate)) ||
-          isSameDay(new Date(inq.eventDate), new Date(endDate))
-      );
-    }
-    if (minValue && minValue > 0) {
-      filtered = filtered.filter((inq) => inq.potentialValue >= minValue);
-    }
+          isSameDay(new Date(inq.eventDate), new Date(endDate));
+      }
+      if (!hasMatch) return false;
+      if (minValue && minValue > 0) {
+        hasMatch = inq.potentialValue >= minValue;
+      }
+      return hasMatch;
+    });
 
     await delay(500);
 

@@ -1,4 +1,10 @@
-import { RGBColor } from "@/types/inquiry";
+import {
+  BoardState,
+  Inquiry,
+  InquiryPhase,
+  PHASES,
+  RGBColor,
+} from "@/types/inquiry";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -27,3 +33,34 @@ export const getRGBColor = ({ r, g, b, alpha = 1 }: RGBColor) => {
 export const delay = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+export const changeInquiryPhase = (
+  activeId: string,
+  board: BoardState,
+  sourcePhase: InquiryPhase,
+  targetPhase: InquiryPhase
+): BoardState | null => {
+  if (!board) return board;
+  const sourceColumn = [...board[sourcePhase]];
+  let targetColumn = [...board[targetPhase]];
+  const sourceIndx = sourceColumn.findIndex((inq) => inq.id === activeId);
+
+  const activeInquiry = sourceColumn.splice(sourceIndx, 1)?.[0];
+
+  if (!activeInquiry) return board;
+
+  targetColumn = [activeInquiry, ...targetColumn];
+
+  const updatedBoard = {
+    ...board,
+    [sourcePhase]: sourceColumn,
+    [targetPhase]: targetColumn,
+  };
+  return updatedBoard;
+};
+
+export const buildBoard = (inquiries: Inquiry[]): BoardState =>
+  PHASES.reduce((acc, phase) => {
+    acc[phase] = inquiries.filter((i) => i.phase === phase);
+    return acc;
+  }, {} as BoardState);

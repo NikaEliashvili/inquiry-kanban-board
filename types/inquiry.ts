@@ -6,7 +6,7 @@ export interface Inquiry {
   eventDate: string;
   guestCount: number;
   potentialValue: number;
-  phase: string;
+  phase: InquiryPhase;
   hotels: string[];
   notes: string;
   createdAt: string;

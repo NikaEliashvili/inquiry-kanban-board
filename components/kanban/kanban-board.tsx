@@ -1,5 +1,5 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import KanbanColumn from "./kanban-column";
 import { BoardState, Inquiry, InquiryPhase, PHASES } from "@/types/inquiry";
 import {
@@ -10,30 +10,35 @@ import {
   DragStartEvent,
   KeyboardSensor,
   MouseSensor,
-  PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
 import InquiryCard from "./inquiry-card";
-
-const buildBoard = (inquiries: Inquiry[]): BoardState =>
-  PHASES.reduce((acc, phase) => {
-    acc[phase] = inquiries.filter((i) => i.phase === phase);
-    return acc;
-  }, {} as BoardState);
+import InquiryModal from "./inquiry-modal";
+import { useInquiryStore } from "@/store/inquiry-store";
+import { buildBoard, changeInquiryPhase, delay } from "@/lib/utils";
+import { updateInquiry } from "@/actions/update-inquiry";
 
 interface KanbanBoardProps {
   inquiries: Inquiry[];
 }
 
 const KanbanBoard: FC<KanbanBoardProps> = ({ inquiries = [] }) => {
-  const [board, setBoard] = useState(() => buildBoard(inquiries));
+  const { inquiriesList, setInquiriesList, board, setBoard } =
+    useInquiryStore();
+  // const [board, setBoard] = useState<BoardState | null>(() =>
+  //   buildBoard(inquiries)
+  // );
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [mount, setMount] = useState<boolean>(false);
 
   const sensors = useSensors(
-    useSensor(MouseSensor),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 100,
@@ -47,98 +52,103 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ inquiries = [] }) => {
     setActiveId(active.id as string);
   };
 
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+  const handleDragEnd = async ({ active, over }: DragEndEvent) => {
+    if (!board) return;
     if (!over) return;
-
+    const freezeBoardState = JSON.parse(JSON.stringify(board));
     const activeId = active.id as string;
-    const overId = over.id as string;
+    const overId = over.id;
 
     let sourcePhase: InquiryPhase | null = null;
     let targetPhase: InquiryPhase | null = null;
 
-    // find source column
     for (const phase of PHASES) {
-      if (board[phase].some((i) => i.id === activeId)) {
+      if (board[phase].some((inq) => inq.id === activeId)) {
         sourcePhase = phase;
+        break;
       }
     }
     if (!sourcePhase) return;
 
-    // find target column (includes empty column detection)
     if (PHASES.includes(overId as InquiryPhase)) {
+      //if PHASES includes overId => target column is empty.
       targetPhase = overId as InquiryPhase;
     } else {
       for (const phase of PHASES) {
-        if (board[phase].some((i) => i.id === overId)) {
+        if (board[phase].some((inq) => inq.id === overId)) {
           targetPhase = phase;
+          break;
         }
       }
     }
+
     if (!targetPhase) return;
 
-    // reorder inside same column
-    if (sourcePhase === targetPhase) {
-      const oldIndex = board[sourcePhase].findIndex((i) => i.id === activeId);
-      const newIndex = board[sourcePhase].findIndex((i) => i.id === overId);
+    if (sourcePhase === targetPhase) return;
 
-      setBoard((prev) => ({
-        ...prev,
-        [sourcePhase]: arrayMove(prev[sourcePhase], oldIndex, newIndex),
-      }));
+    if (!board) return board;
+    const updatedBoard = changeInquiryPhase(
+      activeId,
+      board,
+      sourcePhase,
+      targetPhase
+    );
+    setBoard(updatedBoard);
+
+    try {
+      await updateInquiry(activeId, targetPhase);
+      const updatedInquiries = inquiriesList.map((inq) =>
+        inq.id !== activeId ? inq : { ...inq, phase: targetPhase }
+      );
+      setInquiriesList(updatedInquiries);
+    } catch (error) {
+      await delay(1000);
+      console.error("Sorry, we could not update phase.");
+      setBoard(freezeBoardState);
       return;
     }
-
-    // move to another column
-    setBoard((prev) => {
-      const source = [...prev[sourcePhase!]];
-      const target = [...prev[targetPhase!]];
-
-      const sourceIndex = source.findIndex((i) => i.id === activeId);
-      const moved = source[sourceIndex];
-
-      source.splice(sourceIndex, 1);
-
-      if (PHASES.includes(overId as InquiryPhase)) {
-        // dropped into empty column
-        target.push({ ...moved, phase: targetPhase! });
-      } else {
-        // dropped on top of a card in another column
-        const targetIndex = target.findIndex((i) => i.id === overId);
-        target.splice(targetIndex, 0, { ...moved, phase: targetPhase! });
-      }
-
-      return {
-        ...prev,
-        [sourcePhase!]: source,
-        [targetPhase!]: target,
-      };
-    });
   };
 
   const activeItem =
-    (activeId &&
-      Object.values(board)
-        .flat()
-        .find((i) => i.id === activeId)) ||
-    null;
+    (activeId && inquiriesList.find((i) => i.id === activeId)) || null;
+
+  useEffect(() => {
+    setInquiriesList(inquiries);
+    setBoard(buildBoard(inquiries));
+  }, [inquiries]);
+
+  useEffect(() => {
+    if (!mount) {
+      setMount(true);
+    }
+  }, [mount]);
+
+  if (!mount) return null;
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex flex-row gap-4 overflow-x-auto p-1">
-        {PHASES.map((phase) => (
-          <KanbanColumn key={phase} type={phase} inquiries={board[phase]} />
-        ))}
-      </div>
-      {/* 🔥 Makes dragging smooth */}
-      <DragOverlay>
-        {activeItem ? <InquiryCard inquiry={activeItem} isOverlay /> : null}
-      </DragOverlay>
-    </DndContext>
+    <>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        key={"dnd-context"}
+      >
+        <div className="flex flex-row gap-4 overflow-x-auto ">
+          {PHASES.map((phase) => (
+            <KanbanColumn
+              key={phase}
+              type={phase}
+              inquiries={board?.[phase] || []}
+            />
+          ))}
+        </div>
+        <DragOverlay className="opacity-80">
+          {activeItem ? <InquiryCard inquiry={activeItem} isOverlay /> : null}
+        </DragOverlay>
+      </DndContext>
+      <InquiryModal />
+    </>
   );
 };
 

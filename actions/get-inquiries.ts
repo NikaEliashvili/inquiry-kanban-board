@@ -1,8 +1,29 @@
 import { BASE_API_URL } from "@/lib/constants";
 
-export const getInquiries = async () => {
+interface GetInquiriesParams {
+  clientName?: string;
+  eventFrom?: string;
+  eventTo?: string;
+  minValue?: number;
+}
+
+export const getInquiries = async ({
+  clientName,
+  eventFrom,
+  eventTo,
+  minValue,
+}: GetInquiriesParams) => {
   try {
-    const res = await fetch(`${BASE_API_URL}/inquiries`);
+    let params = ``;
+
+    if (clientName) params += `clientName=${clientName}&`;
+    if (eventFrom) params += `eventFrom=${eventFrom}&`;
+    if (eventTo) params += `eventTo=${eventTo}&`;
+    if (minValue) params += `minValue=${minValue}`;
+
+    const res = await fetch(`${BASE_API_URL}/inquiries?${params}`, {
+      cache: "no-store",
+    });
     const data = await res.json();
     return data;
   } catch (err) {
