@@ -1,5 +1,4 @@
 import { getInquiries } from "@/data/data-handler";
-import { mockInquiries } from "@/data/mock-inquiries";
 import { delay } from "@/lib/utils";
 import { isAfter, isBefore, isDate, isSameDay } from "date-fns";
 import { NextRequest, NextResponse } from "next/server";
@@ -13,33 +12,7 @@ export async function GET(request: NextRequest) {
     const minValueQuery = searchParams.get("minValue");
     const minValue = Number(minValueQuery);
 
-    let inquiriesList = getInquiries();
-
-    // if (clientName) {
-    //   filtered = filtered.filter((inq) =>
-    //     inq.clientName
-    //       .toLocaleLowerCase()
-    //       .includes(clientName.toLocaleLowerCase())
-    //   );
-    // }
-    // if (startDate && isDate(new Date(startDate))) {
-    //   filtered = filtered.filter(
-    //     (inq) =>
-    //       isAfter(new Date(inq.eventDate), new Date(startDate)) ||
-    //       isSameDay(new Date(inq.eventDate), new Date(startDate))
-    //   );
-    // }
-
-    // if (endDate && isDate(endDate)) {
-    //   filtered = filtered.filter(
-    //     (inq) =>
-    //       isBefore(new Date(inq.eventDate), new Date(endDate)) ||
-    //       isSameDay(new Date(inq.eventDate), new Date(endDate))
-    //   );
-    // }
-    // if (minValue && minValue > 0) {
-    //   filtered = filtered.filter((inq) => inq.potentialValue >= minValue);
-    // }
+    const inquiriesList = getInquiries();
 
     const filtered = inquiriesList.filter((inq) => {
       let hasMatch = true;

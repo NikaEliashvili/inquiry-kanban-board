@@ -31,7 +31,6 @@ const Select: FC<SelectProps> = ({
 
   const selectedOption = options.find((o) => o.value === value);
 
-  // close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (!ref.current) return;
@@ -71,7 +70,6 @@ const Select: FC<SelectProps> = ({
         />
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md">
           <ul className="max-h-60 overflow-auto py-1">
