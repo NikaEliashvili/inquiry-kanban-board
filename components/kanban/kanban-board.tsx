@@ -1,5 +1,5 @@
 "use client";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import KanbanColumn from "./kanban-column";
 import { BoardState, Inquiry, InquiryPhase, PHASES } from "@/types/inquiry";
 import {
@@ -25,18 +25,17 @@ interface KanbanBoardProps {
 }
 
 const KanbanBoard: FC<KanbanBoardProps> = ({ inquiries = [] }) => {
+  const freezeBoardRef = useRef<BoardState | null>(null);
   const { inquiriesList, setInquiriesList, board, setBoard } =
     useInquiryStore();
-  // const [board, setBoard] = useState<BoardState | null>(() =>
-  //   buildBoard(inquiries)
-  // );
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const [mount, setMount] = useState<boolean>(false);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 4,
       },
     }),
     useSensor(TouchSensor, {
@@ -55,9 +54,12 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ inquiries = [] }) => {
   const handleDragEnd = async ({ active, over }: DragEndEvent) => {
     if (!board) return;
     if (!over) return;
-    const freezeBoardState = JSON.parse(JSON.stringify(board));
     const activeId = active.id as string;
     const overId = over.id;
+
+    if (!freezeBoardRef.current) {
+      freezeBoardRef.current = JSON.parse(JSON.stringify(board));
+    }
 
     let sourcePhase: InquiryPhase | null = null;
     let targetPhase: InquiryPhase | null = null;
@@ -97,14 +99,20 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ inquiries = [] }) => {
 
     try {
       await updateInquiry(activeId, targetPhase);
+
       const updatedInquiries = inquiriesList.map((inq) =>
         inq.id !== activeId ? inq : { ...inq, phase: targetPhase }
       );
+
+      console.log("It changed inquiries list! ");
+      freezeBoardRef.current = null;
       setInquiriesList(updatedInquiries);
     } catch (error) {
       await delay(1000);
-      console.error("Sorry, we could not update phase.");
-      setBoard(freezeBoardState);
+      console.error("Sorry, we could not update phase.", error);
+      if (freezeBoardRef.current) {
+        setBoard(freezeBoardRef.current);
+      }
       return;
     }
   };
@@ -115,7 +123,7 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ inquiries = [] }) => {
   useEffect(() => {
     setInquiriesList(inquiries);
     setBoard(buildBoard(inquiries));
-  }, [inquiries]);
+  }, [inquiries, setBoard, setInquiriesList]);
 
   useEffect(() => {
     if (!mount) {
@@ -134,7 +142,7 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ inquiries = [] }) => {
         onDragEnd={handleDragEnd}
         key={"dnd-context"}
       >
-        <div className="flex flex-row gap-4 overflow-x-auto ">
+        <div className="flex flex-row gap-4 overflow-x-auto py-1 ">
           {PHASES.map((phase) => (
             <KanbanColumn
               key={phase}
@@ -143,7 +151,7 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ inquiries = [] }) => {
             />
           ))}
         </div>
-        <DragOverlay className="opacity-80">
+        <DragOverlay className="opacity-80 active:scale-105  active:-rotate-2">
           {activeItem ? <InquiryCard inquiry={activeItem} isOverlay /> : null}
         </DragOverlay>
       </DndContext>

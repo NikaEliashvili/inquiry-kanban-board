@@ -1,4 +1,3 @@
-import { buildBoard } from "@/lib/utils";
 import { BoardState, Inquiry } from "@/types/inquiry";
 import { create } from "zustand";
 

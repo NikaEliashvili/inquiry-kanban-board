@@ -19,7 +19,6 @@ import {
   Calendar,
   Clock,
   FileText,
-  Timer,
   User,
   Users,
 } from "lucide-react";
@@ -44,6 +43,7 @@ const InquiryModal = () => {
 
   const handleChangePhase = async (phase: InquiryPhase) => {
     if (!board || !selectedInquiry) return null;
+    const freezeSelectedInquiry = selectedInquiry;
     const freezeBoardState = board;
     const newBoard = changeInquiryPhase(
       selectedInquiry.id,
@@ -63,8 +63,9 @@ const InquiryModal = () => {
       setInquiriesList(updatedInquiries);
     } catch (error) {
       await delay(1000);
-      console.error("Sorry, we could not update phase.");
+      console.error("Sorry, we could not update phase. ", error);
       setBoard(freezeBoardState);
+      setSelectedInquiry(freezeSelectedInquiry);
       return;
     }
   };

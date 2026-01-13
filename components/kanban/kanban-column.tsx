@@ -2,10 +2,7 @@ import React, { FC, useMemo } from "react";
 import InquiryCard from "./inquiry-card";
 import { Inquiry, InquiryPhase, PHASE_CONFIG } from "@/types/inquiry";
 import { cn, formatCurrency, getRGBColor } from "@/lib/utils";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+
 import { useDroppable } from "@dnd-kit/core";
 
 interface KanbanBoardProps {
@@ -14,7 +11,7 @@ interface KanbanBoardProps {
 }
 
 const KanbanColumn: FC<KanbanBoardProps> = ({ type, inquiries = [] }) => {
-  const { setNodeRef, isOver, active } = useDroppable({
+  const { setNodeRef, isOver, active, over } = useDroppable({
     id: type,
   });
   const inquiriesCount = inquiries.length || 0;
@@ -22,11 +19,14 @@ const KanbanColumn: FC<KanbanBoardProps> = ({ type, inquiries = [] }) => {
     return inquiries.reduce((acc, cur) => acc + cur.potentialValue, 0);
   }, [inquiries]);
 
+  const isColumnActive = isOver || inquiries.some((i) => i.id === over?.id);
+  console.log(over);
+
   return (
     <div
       className={cn(
-        "flex flex-col bg-background/50 rounded-xl w-full min-w-[300px] max-w-[900px] flex-1 pb-8 relative ",
-        isOver && "ring ring-primary/5"
+        "flex flex-col bg-background/50  rounded-xl w-full min-w-[300px] max-w-[900px] flex-1 pb-8 relative ",
+        isColumnActive && "ring ring-primary/5"
       )}
     >
       <div className=" flex flex-col gap-3 py-4 px-2 pb-0 sticky top-0 ">
@@ -50,33 +50,28 @@ const KanbanColumn: FC<KanbanBoardProps> = ({ type, inquiries = [] }) => {
         </div>
       </div>
       <div className="h-[1px] w-full bg-muted-foreground/10 my-6" />
-      <SortableContext
-        items={inquiries.map((i) => i.id)}
-        strategy={verticalListSortingStrategy}
-        key={"sortable-context"}
+
+      <div
+        ref={setNodeRef}
+        className={cn("flex flex-col gap-4 px-2 min-h-[120px]")}
       >
-        <div
-          ref={setNodeRef}
-          className={cn("flex flex-col gap-4 px-2 min-h-[120px]")}
-        >
-          {inquiries.length > 0 ? (
-            inquiries.map((inquiry) => (
-              <InquiryCard key={inquiry.id} inquiry={inquiry} />
-            ))
-          ) : (
-            <div
-              className={cn(
-                "w-full h-32 place-content-center border-2 border-dashed rounded-lg ",
-                isOver && "border-primary bg-primary/5"
-              )}
-            >
-              <p className="text-center text-muted-foreground text-sm">
-                {active ? " Drop here" : "No inquiries"}
-              </p>
-            </div>
-          )}
-        </div>
-      </SortableContext>
+        {inquiries.length > 0 ? (
+          inquiries.map((inquiry) => (
+            <InquiryCard key={inquiry.id} inquiry={inquiry} />
+          ))
+        ) : (
+          <div
+            className={cn(
+              "w-full h-32 place-content-center border-2 border-dashed rounded-lg ",
+              isColumnActive && "border-primary bg-primary/5"
+            )}
+          >
+            <p className="text-center text-muted-foreground text-sm">
+              {active ? " Drop here" : "No inquiries"}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

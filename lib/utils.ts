@@ -43,6 +43,9 @@ export const changeInquiryPhase = (
   if (!board) return board;
   const sourceColumn = [...board[sourcePhase]];
   let targetColumn = [...board[targetPhase]];
+  sourceColumn.map((inq) =>
+    inq.id === activeId ? { ...inq, phase: targetPhase } : inq
+  );
   const sourceIndx = sourceColumn.findIndex((inq) => inq.id === activeId);
 
   const activeInquiry = sourceColumn.splice(sourceIndx, 1)?.[0];

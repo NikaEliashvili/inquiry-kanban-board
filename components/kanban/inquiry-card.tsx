@@ -57,10 +57,10 @@ const InquiryCard: FC<InquiryCardProps> = ({ inquiry, isOverlay = false }) => {
     >
       <div
         className={cn(
-          "relative w-full bg-background rounded-lg px-4 py-4 border border-border/50 hover:border-primary/40 transition-all space-y-3 shadow-sm hover:shadow-md cursor-pointer active:scale-105  active:-rotate-2",
+          "relative w-full bg-background rounded-lg px-4 py-4 border border-border/50 hover:border-primary/40 transition-all space-y-3 shadow-sm hover:shadow-md cursor-pointer ",
           isHighValue &&
             "ring hover:ring-amber-300 ring-amber-300/0 border-amber-300 hover:border-amber-300",
-          isDragging && "opacity-0"
+          isDragging && "opacity-40 "
         )}
       >
         <h3

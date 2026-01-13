@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Overview
 
-## Getting Started
+This project is built by **Next.js 14 (App Router)**. Application demonstrates a kanban-style inquiry board with **drag-and-drop**, **optimistic UI updates**, and **URL-synced filters**.
 
-First, run the development server:
+The goal is to show clean architecture, predictable state management, and a user-friendly UX while keeping the implementation lightweight and maintainable.
+
+---
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js 18+
+- npm or pnpm
+
+### Install dependencies
+
+```bash
+npm install
+# or
+pnpm install
+```
+
+### Run the development server
 
 ```bash
 npm run dev
 # or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000` in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure Overview
 
-## Learn More
+```
+app/
+  api/
+    inquiries/route.ts         # GET API for inquiries list
+    inquiries/[id]/route.ts    # PATCH API for phase updates
+  loading.tsx                  # Loading skeleton
+  page.tsx                     # Main page
 
-To learn more about Next.js, take a look at the following resources:
+actions/
+    get-inquiries.ts           # action to call the API and GET inquiries list
+    update-inquiry.ts          # action to call the API and PATCH inquiry phase
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+components/
+  kanban/                      # Kanban board & column & card & modal
+  filters/                     # Filters panel and its related components
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+store/
+  filters-store.ts             # Zustand store for filters
+  inquiry-store.ts             # Zustand store for inquiries
 
-## Deploy on Vercel
+lib/
+  utils.ts                     # Shared helpers (formatting, delay, ...)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+hooks/
+  use-debounce.ts              # useDebounce hook
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+data/
+  mock-inquiries.ts            # Mock data source
+  data-handler.ts              # Data mutation helpers
+
+types/
+  inquiry.ts                   # Shared domain types
+```
+
+---
+
+## Libraries Used & Why
+
+### Zustand
+
+- Lightweight state management
+- Minimal boilerplate
+
+### @dnd-kit
+
+- Lightweight drag-and-drop
+- Full control over drag logic
+- No DOM mutation side effects
+
+### date-dns
+
+- Lightweight date utility library
+- Excellent formatting
+- Small bundle size
+
+### lucide-react
+
+- Lightweight SVG icon library
+- Consistent and modern icon set
+- React-first API
+
+### clsx
+
+- Utility for conditional class names
+- Keeps JSX clean and readable
+- Minimal and dependency-free
+- Used with tailwind-merge for Tailwind classes.
+
+---
+
+## Notes for Reviewer
+
+- API errors are handled explicitly via HTTP status checks
+- Optimistic updates are reverted on failure
+- Filters are synced to URL search params for shareable state
+
+### To Check optimistic updates on Error:
+
+##### API Always throws Error on this inquiry for checking purposes
+
+- ID: **INQ-2026-0039**
+- ClientName: **Zurich Insurance**
+
+---
