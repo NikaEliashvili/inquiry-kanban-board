@@ -20,7 +20,6 @@ const KanbanColumn: FC<KanbanBoardProps> = ({ type, inquiries = [] }) => {
   }, [inquiries]);
 
   const isColumnActive = isOver || inquiries.some((i) => i.id === over?.id);
-  console.log(over);
 
   return (
     <div

@@ -104,7 +104,6 @@ const KanbanBoard: FC<KanbanBoardProps> = ({ inquiries = [] }) => {
         inq.id !== activeId ? inq : { ...inq, phase: targetPhase }
       );
 
-      console.log("It changed inquiries list! ");
       freezeBoardRef.current = null;
       setInquiriesList(updatedInquiries);
     } catch (error) {

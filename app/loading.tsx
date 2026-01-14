@@ -10,7 +10,7 @@ import React from "react";
 
 const Loading = () => {
   return (
-    <div className="w-full max-w-full px-4 space-y-6 pb-20 animate-pulse">
+    <div className="relative w-full max-w-full px-4 space-y-2 pb-4">
       <div className="flex flex-col gap-4 bg-background p-4 rounded-lg ">
         <div className="flex justify-between items-center w-full">
           <div className="flex flex-row items-center gap-2">
@@ -25,7 +25,7 @@ const Loading = () => {
           <PriceSlider />
         </div>
       </div>
-      <div className="flex flex-row gap-4 overflow-x-auto p-1">
+      <div className="flex flex-row gap-4 overflow-x-auto py-1">
         <ColumnSkeleton type="new" />
         <ColumnSkeleton type="sent_to_hotels" />
         <ColumnSkeleton type="offers_received" />
@@ -35,11 +35,22 @@ const Loading = () => {
   );
 };
 
+export const KanbanSkeleton = () => {
+  return (
+    <div className="flex flex-row gap-4 overflow-x-auto py-1">
+      <ColumnSkeleton type="new" />
+      <ColumnSkeleton type="sent_to_hotels" />
+      <ColumnSkeleton type="offers_received" />
+      <ColumnSkeleton type="completed" />
+    </div>
+  );
+};
+
 const ColumnSkeleton = ({ type }: { type: InquiryPhase }) => {
   return (
     <div
       className={
-        "flex flex-col bg-background/50 rounded-xl w-full min-w-[300px] max-w-[900px] flex-1 pb-8 relative "
+        "flex flex-col bg-background/50  rounded-xl w-full min-w-[300px] max-w-[900px] flex-1 pb-8 relative  "
       }
     >
       <div className=" flex flex-col gap-3 py-4 px-2 pb-0">
@@ -64,9 +75,9 @@ const ColumnSkeleton = ({ type }: { type: InquiryPhase }) => {
       </div>
       <div className="h-[1px] w-full bg-muted-foreground/10 my-6" />
       <div className="flex flex-col gap-4 px-2 min-h-[120px]">
-        <div className="w-full h-32 place-content-center border-2 border-dashed rounded-lg ">
-          <p className="text-center text-muted-foreground text-sm">
-            {"Drop here"}
+        <div className="w-full h-36 place-content-center border rounded-lg bg-muted">
+          <p className="text-sm text-center font-medium text-muted-foreground">
+            Loading...
           </p>
         </div>
       </div>

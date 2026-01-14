@@ -15,7 +15,6 @@ export const updateInquiry = async (inquiryId: string, targetPhase: string) => {
     }
   } catch (error) {
     console.log(error);
-
     throw new Error("Sorry, something went wrong...");
   }
 };

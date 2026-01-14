@@ -1,6 +1,6 @@
 import { useFiltersStore } from "@/store/filters-store";
 import { Calendar } from "lucide-react";
-import React, { FC } from "react";
+import React from "react";
 
 const EventDateFromFilter = () => {
   const { eventFrom, updateEventFrom } = useFiltersStore();

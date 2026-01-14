@@ -1,5 +1,5 @@
 import { useFiltersStore } from "@/store/filters-store";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 const FiltersCounter = () => {
   const {
@@ -18,7 +18,7 @@ const FiltersCounter = () => {
     if (eventTo) count++;
     if (minValue) count++;
     updateFiltersCount(count);
-  }, [clientName, eventFrom, eventTo, , minValue]);
+  }, [clientName, eventFrom, eventTo, minValue, updateFiltersCount]);
 
   if (!filtersCount) return null;
 

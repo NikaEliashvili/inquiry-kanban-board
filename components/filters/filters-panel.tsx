@@ -1,5 +1,5 @@
 "use client";
-import { Filter, X } from "lucide-react";
+import { Filter } from "lucide-react";
 import React, { useEffect } from "react";
 import ClientNameFilter from "./client-name-filter";
 import PriceSlider from "./price-slider";
@@ -31,32 +31,40 @@ const FiltersPanel = () => {
     500
   );
 
+  useEffect(() => {
+    updateClientName(searchParams.get("clientName") ?? "");
+    updateEventFrom(searchParams.get("eventFrom") ?? "");
+    updateEventTo(searchParams.get("eventTo") ?? "");
+    updateMinValue(Number(searchParams.get("minValue")) || 0);
+  }, [
+    searchParams,
+    updateClientName,
+    updateEventFrom,
+    updateEventTo,
+    updateMinValue,
+  ]);
+
   // Save filters in URL Params
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
-    const { clientName, eventFrom, eventTo, minValue } = debounced;
-    clientName
-      ? params.set("clientName", clientName)
-      : params.delete("clientName");
-    eventFrom ? params.set("eventFrom", eventFrom) : params.delete("eventFrom");
-    eventTo ? params.set("eventTo", eventTo) : params.delete("eventTo");
-    minValue
-      ? params.set("minValue", String(minValue))
-      : params.delete("minValue");
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [debounced]);
+    if (debounced.clientName) params.set("clientName", debounced.clientName);
+    else params.delete("clientName");
 
-  useEffect(() => {
-    const clientNameQuery = searchParams.get("clientName");
-    const eventFromQuery = searchParams.get("eventFrom");
-    const eventToQuery = searchParams.get("eventTo");
-    const minValueQuery = searchParams.get("minValue");
-    if (clientNameQuery) updateClientName(clientNameQuery);
-    if (eventFromQuery) updateEventFrom(eventFromQuery);
-    if (eventToQuery) updateEventTo(eventToQuery);
-    if (minValueQuery) updateMinValue(Number(minValueQuery));
-  }, []);
+    if (debounced.eventFrom) params.set("eventFrom", debounced.eventFrom);
+    else params.delete("eventFrom");
+    if (debounced.eventTo) params.set("eventTo", debounced.eventTo);
+    else params.delete("eventTo");
+    if (debounced.minValue > 0)
+      params.set("minValue", String(debounced.minValue));
+    else params.delete("minValue");
+
+    const url = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname;
+
+    router.replace(url, { scroll: false });
+  }, [debounced, pathname, router, searchParams]);
 
   return (
     <div className="flex flex-col gap-4 bg-background p-4 rounded-lg ">

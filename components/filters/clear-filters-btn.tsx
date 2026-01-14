@@ -15,7 +15,6 @@ const ClearFiltersBtn = () => {
       )}
       onClick={() => {
         clearFilters();
-        console.log("clicked");
       }}
       disabled={!isActive}
       draggable={false}

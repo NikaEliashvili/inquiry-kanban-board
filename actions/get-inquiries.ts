@@ -21,9 +21,7 @@ export const getInquiries = async ({
     if (eventTo) params += `eventTo=${eventTo}&`;
     if (minValue) params += `minValue=${minValue}`;
 
-    const res = await fetch(`${BASE_API_URL}/inquiries?${params}`, {
-      cache: "no-store",
-    });
+    const res = await fetch(`${BASE_API_URL}/inquiries?${params}`);
     const data = await res.json();
     return data;
   } catch (err) {
